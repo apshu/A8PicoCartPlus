@@ -21,6 +21,11 @@ If you build an A8PicoCart consider donating to help fund this and my future pro
 
 Get yourself a purple Raspberry Pi Pico clone (see [this thread](https://forums.raspberrypi.com/viewtopic.php?t=337976) for details) and order a PCB using the KiCad board files provided. You have a choice of two PCB designs - the XE design is for use uncased, with the Pico on the top surface. The XL/XE version is desgined to be mounted in a case (though can be used uncased too) with the Pico on the bottom/back surface. Once you have the Pico clone and PCB, solder the pico as pictured below, depending on your PCB version. Program the firmware onto the device by pressing BOOTSEL on the board and connecting to USB on a PC and drag the firmware (UF2 file) onto the device. It should then remount as A8-PICOCART so you can copy Atari CAR & XEX files to it. Unmount, then plug into your Atari and play! Optionally solder a reset button to reset back to the menu.
 
+**Note**: this project does not work with the official green RPi Pico board. Although the official board has the same
+number of physical pins (and will therefore fit in the PCB) - the actual pin functions are different and attempting to use
+it may damage the Pico and/or your Atari. The purple clones are cheaper and have a greater number of usuable GPIO pins - 
+this is required for the cartridge port emulation to work.
+
 **Warning**: always disconnect from PC/USB before plugging into your Atari or you will damage your Atari and/or PC. This warning mainly
 applies to the XE/uncased version of the PCB. The newest version of the XL/XE board makes it physically impossible to connect USB when the
 cartridge is inserted in an Atari.
