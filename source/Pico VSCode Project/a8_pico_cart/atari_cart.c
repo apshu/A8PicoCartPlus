@@ -418,7 +418,7 @@ int write_atr_sector(uint16_t sector, uint8_t page, uint8_t *buf) {
 int load_file(char *filename) {
 	FATFS FatFs;
 	int cart_type = CART_TYPE_NONE;
-	int car_file = 0, xex_file = 0, expectedSize = 0;
+	int car_file = 0, xex_file = 0, expectedSize = 0, car_type = 0;
 	unsigned char carFileHeader[16];
 	UINT br, size = 0;
 
@@ -443,7 +443,7 @@ int load_file(char *filename) {
 			strcpy(errorBuf, "Bad CAR file");
 			goto closefile;
 		}
-		int car_type = carFileHeader[7];
+		car_type = carFileHeader[7];
 		if (car_type == 1)			{ cart_type = CART_TYPE_8K; expectedSize = 8192; }
 		else if (car_type == 2)		{ cart_type = CART_TYPE_16K; expectedSize = 16384; }
 		else if (car_type == 3) 	{ cart_type = CART_TYPE_OSS_16K_034M; expectedSize = 16384; }
@@ -517,6 +517,10 @@ int load_file(char *filename) {
 	}
 
 	if (car_file) {
+		// special case for williams 64K cartridges that are marked 32K
+		if (car_type == 22 && size == 65536) {
+			expectedSize = 65536;
+		}
 		if (size != expectedSize) {
 			strcpy(errorBuf, "CAR file is wrong size");
 			cart_type = CART_TYPE_NONE;
