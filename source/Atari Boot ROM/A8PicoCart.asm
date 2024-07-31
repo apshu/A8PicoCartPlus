@@ -44,9 +44,9 @@ CARTFG_DIAGNOSTIC_CART = $80       ;Flag value: Directly jump via CARTAD during 
 CARTFG_START_CART      = $04       ;Flag value: Jump via CARTAD and then via CARTCS.
 CARTFG_BOOT            = $01       ;Flag value: Boot peripherals, then start the module.
 
-COLDSV = $E477				; Coldstart (powerup) entry point
-WARMSV = $E474				; Warmstart entry point
-CH = $2FC				; Internal hardware value for the last key pressed
+COLDSV = $E477                     ;Coldstart (powerup) entry point
+WARMSV = $E474                     ;Warmstart entry point
+CH = $2FC                          ;Internal hardware value for the last key pressed
 BOOT = $09
 CASINI = $02
 OSROM = $C000
@@ -87,9 +87,9 @@ Trig0	equ $D010
 ColPM2	equ $D014
 GRACTL	equ $D01D
 
-sm_ptr = $58				; screen memory
+sm_ptr = $58						; screen memory
 search_string = $600
-wait_for_cart = $620			; routine copied here
+wait_for_cart = $620				; routine copied here
 reboot_to_selected_cart = $630		; routine copied here
 
 PMBuffer = $800
@@ -264,42 +264,61 @@ main_loop
 	jsr wait_for_vsync
 	jsr GetKey
 	beq check_joystick
-	cmp #$1C ; cur up
+					;BACK
+	cmp #'+'		;Cur left without Ctrl key
+	bne @+
+	jmp back_pressed
+@	cmp #'b'
+	bne @+
+	jmp back_pressed
+@	cmp #$1E 		;cur left
+	bne @+ 
+	jmp back_pressed
+@	cmp #$7E 		;Backspace
+	bne @+ 
+	jmp back_pressed
+					;ENTER
+@	cmp #$9B 		;ret
+	bne @+
+	jmp return_pressed
+					;DISABLE
+@	cmp #'x'
+	bne @+
+	jmp disable_pressed
+					;SEARCH
+@	cmp #$1B 		;esc
+	bne @+
+	jmp search_pressed
+@       cmp #'/'
+	bne @+
+	jmp search_pressed
+					;FWD PAGE
+@	cmp #'>'
+	bne @+
+	jmp adv_page
+					;REW PAGE
+@       cmp #'<'
+	bne @+
+	jmp rev_page
+@					;UP
+	cmp #$1C 		;cur up
 	beq up_pressed
 	cmp #'-'
 	beq up_pressed
-	
-	cmp #$1D ; cur down
+					;DOWN
+	cmp #$1D 		;cur down
 	beq down_pressed
 	cmp #'='
 	beq down_pressed
 	
-	cmp #'b'
-	bne _1
-	jmp back_pressed
-_1	cmp #$1E ; cur left
-	bne _2 
-	jmp back_pressed
-
-_2	cmp #$9B ; ret
-	bne _3
-	jmp return_pressed
-
-_3	cmp #'x'
-	bne _4
-	jmp disable_pressed
-
-_4	cmp #$1B ; esc
-	bne _5
-	jmp search_pressed
-_5
 check_joystick
 	jsr read_joystick
 	lda trigger_pressed
 	cmp #1
-	beq return_pressed
+	bne @+
+	jmp return_pressed
 	
-	lda stick_input
+@	lda stick_input
 	and #$01
 	bne up_pressed
 	
@@ -314,9 +333,10 @@ down_pressed
 	clc
 	adc #1
 	cmp num_dir_entries
-	bcs main_loop
+	bcc @+
+	jmp main_loop
 ; single row down
-	inc cur_item
+@	inc cur_item
 ; do we need to page down?
 	lda cur_item
 	sec
@@ -324,6 +344,28 @@ down_pressed
 	clc	
 	cmp #ITEMS_PER_PAGE
 	beq page_down
+	jsr draw_cursor
+	jmp main_loop
+adv_page
+	lda cur_item
+	clc
+	adc #ITEMS_PER_PAGE	; A <- Current + Itemsperpage
+	bcc @+			;check we passed $FF
+	jmp cur_item_max	;if yes, deal with the case in cur_item_max
+@	cmp num_dir_entries	;Check if surpasses max
+	bcs cur_item_max	;if yes, deal with it
+	sta cur_item		;if not, then save it and jump to page down
+	jmp page_down
+cur_item_max
+	lda num_dir_entries	
+	sec
+	sbc #1
+	sta cur_item		;saturate current item <- max-1
+	sec
+	sbc top_item		;but need to move to next page?
+	clc
+	cmp #ITEMS_PER_PAGE
+	bcs page_down		;if yes, then move to next page
 	jsr draw_cursor
 	jmp main_loop
 page_down
@@ -336,13 +378,28 @@ page_down
 up_pressed
 	lda cur_item
 	cmp #0
-	beq main_loop
+	bne @+
+	jmp main_loop
 ; single row up
-	dec cur_item
+@	dec cur_item
 ; do we need to page up
 	lda cur_item
 	cmp top_item
 	bmi page_up
+	jsr draw_cursor
+	jmp main_loop
+rev_page
+	lda cur_item
+	sec
+	sbc #ITEMS_PER_PAGE
+	bcc cur_item_min	;check if reach top of the file list, if yes, then deal with it
+	sta cur_item		;if not, then save it and jump to page up
+	jmp page_up
+cur_item_min
+	lda cur_item
+	bne @+			;if current item already zero, do nothing 
+	jmp main_loop
+@	mva #0 cur_item		;o.w. set current item to zero
 	jsr draw_cursor
 	jmp main_loop
 page_up
@@ -1098,10 +1155,10 @@ Loop
 	.byte " / _ \/ _ \  _/ / _/_\ (__/ _' | '_|  _|"
 	.endl
 	.local menu_text4
-	.byte "/_/ \_\___/_| |_\__\_/\___\__,_|_|  \__|"
+	.byte "/_/ \_\___/_| |_\__\_/\___\__,_|_|  \__)"
 	.endl
 	.local menu_text5
-	.byte "                      Electrotrains 2023"
+	.byte "                      Electrotrains 2024"
 	.endl
 	.local menu_text_bottom
 	.byte 'CurUp/Dn/Retn=Sel B=Back X=Boot Esc=Find'
