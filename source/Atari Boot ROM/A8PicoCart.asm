@@ -296,17 +296,32 @@ main_loop
 @	cmp #'>'
 	bne @+
 	jmp adv_page
+@	cmp #$8F
+	bne @+
+	jmp adv_page
 					;REW PAGE
 @       cmp #'<'
 	bne @+
 	jmp rev_page
+@       cmp #$8E
+	bne @+
+	jmp rev_page
+
+@	cmp #$90		;HOME Button: first item (TKII)
+	bne @+
+	jmp first_item
+@	cmp #$91		;END Button: last item (TKII)
+	bne @+
+	jmp last_item
 @					;UP
 	cmp #$1C 		;cur up
-	beq up_pressed
-	cmp #'-'
-	beq up_pressed
+	bne @+
+	jmp up_pressed
+@	cmp #'-'
+	bne @+
+	jmp up_pressed
 					;DOWN
-	cmp #$1D 		;cur down
+@	cmp #$1D		;cur down
 	beq down_pressed
 	cmp #'='
 	beq down_pressed
@@ -368,6 +383,21 @@ cur_item_max
 	bcs page_down		;if yes, then move to next page
 	jsr draw_cursor
 	jmp main_loop
+last_item
+	lda num_dir_entries
+	sec
+	sbc #1
+	sta cur_item		;set current item the last one (N-1)
+	lda top_item		;advance top item one page at...	
+@	clc					;the time until reach the end
+	adc #ITEMS_PER_PAGE
+	bcs @+				;it passed $FF so we are done
+	cmp num_dir_entries	;check whether it passed N	
+	bcc @-				;if not then adv another page
+@	sec					;need to move one page back
+	sbc #ITEMS_PER_PAGE
+	sta top_item
+	jmp display_directory
 page_down
 	lda top_item
 	clc
@@ -402,6 +432,10 @@ cur_item_min
 @	mva #0 cur_item		;o.w. set current item to zero
 	jsr draw_cursor
 	jmp main_loop
+first_item
+	mva #$00 cur_item
+	sta top_item		;update top item and update dir
+	jmp display_directory	
 page_up
 	lda top_item
 	sec
@@ -1158,7 +1192,7 @@ Loop
 	.byte "/_/ \_\___/_| |_\__\_/\___\__,_|_|  \__)"
 	.endl
 	.local menu_text5
-	.byte "                      Electrotrains 2024"
+	.byte "                Electrotrains 09/05/2024"
 	.endl
 	.local menu_text_bottom
 	.byte 'CurUp/Dn/Retn=Sel B=Back X=Boot Esc=Find'
