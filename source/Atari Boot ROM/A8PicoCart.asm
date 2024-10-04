@@ -64,6 +64,7 @@ COLOR1 = $2C5
 COLOR2 = $2C6
 COLOR3 = $2C7
 COLOR4 = $2C8
+PADDL0 = $270
 STICK0 = $278
 
 HPosP0	equ $D000
@@ -118,6 +119,7 @@ text_out_y	= $94	// word
 text_out_ptr	= $96	// word
 text_out_len	= $98
 cur_chunk	= $99
+joy2b		= $100
 
 ; XEX loader stuff from Jon Halliday/FJC
 LoaderAddress	equ $700
@@ -216,7 +218,7 @@ patch_boot
 	mva #3 BOOT ; patch reset - from mapping the atari (revised) appendix 11
 	mwa #reset_routine CASINI
 	
-        jsr display_boot_screen
+	jsr display_boot_screen
 	jsr copy_wait_for_cart
 	jsr copy_reboot_to_selected_cart
 	jsr setup_pmg
@@ -268,13 +270,10 @@ main_loop
 	cmp #'+'		;Cur left without Ctrl key
 	bne @+
 	jmp back_pressed
-@	cmp #'b'
+@	cmp #$1B
 	bne @+
 	jmp back_pressed
 @	cmp #$1E 		;cur left
-	bne @+ 
-	jmp back_pressed
-@	cmp #$7E 		;Backspace
 	bne @+ 
 	jmp back_pressed
 					;ENTER
@@ -282,14 +281,14 @@ main_loop
 	bne @+
 	jmp return_pressed
 					;DISABLE
-@	cmp #'x'
+@	cmp #'b'
 	bne @+
 	jmp disable_pressed
 					;SEARCH
-@	cmp #$1B 		;esc
+@	cmp #'f' 		;esc
 	bne @+
 	jmp search_pressed
-@       cmp #'/'
+@	cmp #'/'
 	bne @+
 	jmp search_pressed
 					;FWD PAGE
@@ -300,10 +299,10 @@ main_loop
 	bne @+
 	jmp adv_page
 					;REW PAGE
-@       cmp #'<'
+@	cmp #'<'
 	bne @+
 	jmp rev_page
-@       cmp #$8E
+@	cmp #$8E
 	bne @+
 	jmp rev_page
 
@@ -335,13 +334,28 @@ check_joystick
 	
 @	lda stick_input
 	and #$01
-	bne up_pressed
+	beq @+
+	jmp up_pressed
 	
-	lda stick_input
+@	lda stick_input
 	and #$02
-	bne down_pressed
+	beq @+
+	jmp down_pressed
 	
-	jmp main_loop
+@	lda stick_input
+	and #$04	
+	beq @+
+	jmp back_pressed
+
+@	lda PADDL0		;Joy 2B+ support
+	cmp joy2b
+	beq @+
+	sta joy2b
+	eor #$e4
+	bne @+
+	jmp back_pressed
+	
+@	jmp main_loop
 
 down_pressed
 	lda cur_item
@@ -490,6 +504,7 @@ disable_pressed
 
 launch_xex
 	jsr disable_pmg
+	jsr clear_ram_boot
 	jsr copy_XEX_loader
 	jmp LoadBinaryFile
 	
@@ -529,7 +544,7 @@ search
 	jsr wait_for_cart
 	mva #1 search_results_mode
 	jmp check_read_dir
-        .endp ; proc start
+    .endp ; proc start
 
 
 ; ************************ SUBROUTINES ****************************
@@ -537,6 +552,7 @@ search
 	mva #$01 trigger_state
 	mva #$0F stick_state
 	mva #0 stick_timer
+	mva #$E4 joy2b
 	rts
 	.endp
 
@@ -1141,7 +1157,9 @@ endoftext
 	jmp COLDSV
 	.endp
 
+
 ; ************************ XEX LOADER ****************************
+
 
 .proc copy_XEX_loader
 	mwa #LoaderCodeStart ptr1
@@ -1176,6 +1194,19 @@ Loop
 	bne Loop
 	rts
 	.endp
+	
+.proc clear_ram_boot
+	lda #0
+	sta NMIEN
+	tax
+@
+	sta $400,x
+	sta $500,x
+	sta $600,x
+	inx
+	bne @-
+	rts
+	.endp
 
 
 ; ************************ DATA ****************************
@@ -1192,10 +1223,10 @@ Loop
 	.byte "/_/ \_\___/_| |_\__\_/\___\__,_|_|  \__)"
 	.endl
 	.local menu_text5
-	.byte "                Electrotrains 09/05/2024"
+	.byte "                Electrotrains 09/29/2024"
 	.endl
 	.local menu_text_bottom
-	.byte 'CurUp/Dn/Retn=Sel B=Back X=Boot Esc=Find'
+	.byte $DD,'/',$DC,'/Return=Sel ',$DE,'/Esc=Back B=Boot F=Find '
 	.endl
 	.local directory_text
 	.byte '[Directory contents]'
