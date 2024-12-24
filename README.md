@@ -1,3 +1,17 @@
+# A8PicoCart+ (A8PicoCart with autoboot and OLED GFX)
+
+The aim of the A8PicoCart+ is to add autoboot feature to the excellent A8PicoCart. 
+
+The autoboot eliminates the need to navigate trough a complex filesystem or many files (e.g. when playing zaxxon :). On power up it checks if the onboard I²C EERAM stores a valid filename. If the filename is valid, it loads the file automatically before showing the selector interface. If the last file can't be loaded (e.g. deleted) the selector GUI is shown.
+
+If the selector UI is needed, press the Choose button on the cart during powerup.
+
+A simple I²C OLED display is included for fun. The 128×64 monochrome display shows the loaded cart logo if the cartridge is recognized as extended format.
+
+A new PCB was needed for the + functionality. The new PCB is 100% compatible with the original firmware, while utilizing the originally unconnected GP28 & GP29 pins for I²C.
+
+3D printable box with the + features is available.
+
 # A8PicoCart (UnoCart on a Raspberry Pi Pico clone)
 
 The A8PicoCart is a multi-cart for the Atari 8-bit (XL/XE) which you can make at home with only basic soldering skills.
