@@ -26,6 +26,7 @@
 #include "fatfs_disk.h"
 
 #include "hardware/i2c.h"
+#include "ssd1306.h"
 
 void cdc_task(void);
 
@@ -54,6 +55,8 @@ int main(void)
 
   stdio_init_all();   // for serial output, via printf()
   printf("Start up\n");  
+  
+  SSD1306_init();     // Init GFX display
 
   // init device stack on configured roothub port
   tud_init(BOARD_TUD_RHPORT);
