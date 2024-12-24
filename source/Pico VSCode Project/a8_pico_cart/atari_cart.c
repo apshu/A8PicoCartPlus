@@ -44,7 +44,7 @@
 #error "I2C not defined"
 #endif
 
-#define ALL_GPIO_MASK   	0x3FFFFFFF
+#define ALL_GPIO_MASK   	0x3FFFFFFF & ~((1 << PICO_DEFAULT_I2C_SCL_PIN) | (1 << PICO_DEFAULT_I2C_SDA_PIN))
 #define ADDR_GPIO_MASK  	0x00001FFF
 #define DATA_GPIO_MASK  	0x001FE000
 #define CCTL_GPIO_MASK  	0x00200000  // gpio 21
