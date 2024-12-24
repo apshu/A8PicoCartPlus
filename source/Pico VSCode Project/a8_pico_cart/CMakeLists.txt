@@ -40,7 +40,7 @@ target_include_directories(a8_pico_cart PUBLIC
 
 # In addition to pico_stdlib required for common PicoSDK functionality, add dependency on tinyusb_device
 # for TinyUSB device support
-target_link_libraries(a8_pico_cart PUBLIC pico_stdlib hardware_flash tinyusb_device)
+target_link_libraries(a8_pico_cart PUBLIC pico_stdlib hardware_flash tinyusb_device hardware_i2c)
 
 # create map/bin/hex/uf2 file in addition to ELF.
 pico_add_extra_outputs(a8_pico_cart)
