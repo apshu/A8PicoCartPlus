@@ -25,6 +25,8 @@
 #include "atari_cart.h"
 #include "fatfs_disk.h"
 
+#include "hardware/i2c.h"
+
 void cdc_task(void);
 
 int main(void)
@@ -33,6 +35,14 @@ int main(void)
     // by checking for high on PHI2 gpio for 100ms
     gpio_init(ATARI_PHI2_PIN);
     gpio_set_dir(ATARI_PHI2_PIN, GPIO_IN);
+
+    // Configuring the I2C host mode
+    i2c_init(i2c_default, DEFAULT_I2C_CLK_SPEED);
+    gpio_set_function(PICO_DEFAULT_I2C_SCL_PIN, GPIO_FUNC_I2C);
+    gpio_set_function(PICO_DEFAULT_I2C_SDA_PIN, GPIO_FUNC_I2C);
+    gpio_pull_up(PICO_DEFAULT_I2C_SCL_PIN);
+    gpio_pull_up(PICO_DEFAULT_I2C_SDA_PIN);
+
     while (to_ms_since_boot(get_absolute_time()) < 100)
     {
       if (gpio_get(ATARI_PHI2_PIN))

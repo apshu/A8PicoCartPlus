@@ -17,6 +17,8 @@
 
 #define ATARI_PHI2_PIN        22    // used on boot to check if we are plugged into an atari or usb
 
+#define DEFAULT_I2C_CLK_SPEED       (400*1000) // Default I2C speed is 400kHz
+
 void atari_cart_main();
 
 #endif
