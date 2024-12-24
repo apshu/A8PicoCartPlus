@@ -45,6 +45,7 @@ target_sources(a8_pico_cart PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/fatfs/ff.c
     ${CMAKE_CURRENT_LIST_DIR}/fatfs/ffunicode.c
     ${CMAKE_CURRENT_LIST_DIR}/fatfs/diskio.c
+    ${CMAKE_CURRENT_LIST_DIR}/ssd1306_i2c.c
 ) 
 
 target_include_directories(a8_pico_cart PUBLIC
