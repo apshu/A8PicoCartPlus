@@ -33,11 +33,16 @@
 #include "pico/stdlib.h"
 #include "hardware/sync.h"
 #include "hardware/clocks.h"
+#include "hardware/i2c.h"
 
 #include "atari_cart.h"
 
 #include "ff.h"
 #include "fatfs_disk.h"
+
+#if !(defined(PICO_DEFAULT_I2C_SCL_PIN) && defined (PICO_DEFAULT_I2C_SDA_PIN) && defined(DEFAULT_I2C_CLK_SPEED))
+#error "I2C not defined"
+#endif
 
 #define ALL_GPIO_MASK   	0x3FFFFFFF
 #define ADDR_GPIO_MASK  	0x00001FFF
