@@ -34,6 +34,8 @@
 #include "hardware/sync.h"
 #include "hardware/clocks.h"
 
+#include "atari_cart.h"
+
 #include "ff.h"
 #include "fatfs_disk.h"
 
@@ -41,7 +43,7 @@
 #define ADDR_GPIO_MASK  	0x00001FFF
 #define DATA_GPIO_MASK  	0x001FE000
 #define CCTL_GPIO_MASK  	0x00200000  // gpio 21
-#define PHI2_GPIO_MASK  	0x00400000  // gpio 22
+#define PHI2_GPIO_MASK  	(1 << ATARI_PHI2_PIN)  // gpio 22
 #define RW_GPIO_MASK    	0x00800000  // gpio 23
 #define S4_GPIO_MASK    	0x01000000  // gpio 24
 #define S5_GPIO_MASK    	0x02000000  // gpio 25
