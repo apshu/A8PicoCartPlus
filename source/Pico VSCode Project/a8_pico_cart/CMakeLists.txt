@@ -20,8 +20,7 @@ include(pico_sdk_import.cmake)
 
 project(a8_pico_cart)
 
-set(PICO_BOARD_HEADER_DIRS ${CMAKE_SOURCE_DIR}) 
-set(PICO_BOARD myboard)
+set(PICO_BOARD weact_studio_rp2040_16mb CACHE STRING "Board type")
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
