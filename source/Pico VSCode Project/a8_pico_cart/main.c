@@ -56,8 +56,28 @@ int main(void)
   stdio_init_all();   // for serial output, via printf()
   printf("Start up\n");  
   
-  SSD1306_init();     // Init GFX display
+  if (SSD1306_init()) {     // Init GFX display
+    // Initialize render area for entire frame (SSD1306_WIDTH pixels by SSD1306_NUM_PAGES pages)
+    uint8_t lcd_buf[SSD1306_BUF_LEN];
+    memset(lcd_buf, 0, SSD1306_BUF_LEN);
+    GFX_render_area_t frame_area = {
+      start_col: 0,
+      end_col : SSD1306_WIDTH - 1,
+      start_page : 0,
+      end_page : SSD1306_NUM_PAGES - 1
+    };
 
+    GFX_calc_render_area_buflen(&frame_area);
+    // zero the entire display buffer
+    uint8_t buf[SSD1306_BUF_LEN];
+    memset(buf, 0, SSD1306_BUF_LEN);
+    // Render the text
+    GFX_WriteString(buf, 15, (SSD1306_HEIGHT>>1) - 10, "Drag and drop");
+    GFX_WriteString(buf, 20, (SSD1306_HEIGHT>>1) + 10, "Atari files");
+    // Show the buffer on screen
+    SSD1306_render(buf, &frame_area);
+  }
+  
   // init device stack on configured roothub port
   tud_init(BOARD_TUD_RHPORT);
 
