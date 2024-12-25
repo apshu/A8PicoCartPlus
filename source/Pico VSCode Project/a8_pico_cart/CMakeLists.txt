@@ -28,6 +28,13 @@ pico_sdk_init()
 
 add_executable(a8_pico_cart)
 
+# Reconfigure default I2C settings according to A8PicoCartPlus board 
+target_compile_definitions(a8_pico_cart PRIVATE
+    PICO_DEFAULT_I2C=0
+    PICO_DEFAULT_I2C_SDA_PIN=28 
+    PICO_DEFAULT_I2C_SCL_PIN=29
+)
+
 #pico_set_linker_script(a8_pico_cart ${CMAKE_CURRENT_SOURCE_DIR}/memmap_custom.ld)
 
 target_sources(a8_pico_cart PUBLIC
