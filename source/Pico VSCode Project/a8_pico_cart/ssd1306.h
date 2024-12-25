@@ -6,6 +6,9 @@
 // Code has been tested on 128x32 and 128x64 OLED displays
 #define SSD1306_HEIGHT              64
 #define SSD1306_WIDTH               128
+#define SSD1306_PAGE_HEIGHT         _u(8)
+#define SSD1306_NUM_PAGES           (SSD1306_HEIGHT / SSD1306_PAGE_HEIGHT)
+#define SSD1306_BUF_LEN             (SSD1306_NUM_PAGES * SSD1306_WIDTH)
 
 #define SSD1306_I2C_ADDR            _u(0x3C)
 
