@@ -71,7 +71,7 @@
 #define SSD1306_READ_MODE          _u(0xFF)
 
 
-struct render_area {
+struct GFX_render_area {
     uint8_t start_col;
     uint8_t end_col;
     uint8_t start_page;
@@ -80,7 +80,7 @@ struct render_area {
     int buflen;
 };
 
-void calc_render_area_buflen(struct render_area *area) {
+void GFX_calc_render_area_buflen(struct GFX_render_area *area) {
     // calculate how long the flattened buffer will be for a render area
     area->buflen = (area->end_col - area->start_col + 1) * (area->end_page - area->start_page + 1);
 }
@@ -186,7 +186,7 @@ void SSD1306_scroll(bool on) {
     SSD1306_send_cmd_list(cmds, count_of(cmds));
 }
 
-void render(uint8_t *buf, struct render_area *area) {
+void SSD1306_render(uint8_t *buf, struct GFX_render_area *area) {
     // update a portion of the display with a render area
     uint8_t cmds[] = {
         SSD1306_SET_COL_ADDR,
@@ -201,7 +201,7 @@ void render(uint8_t *buf, struct render_area *area) {
     SSD1306_send_buf(buf, area->buflen);
 }
 
-static void SetPixel(uint8_t *buf, int x,int y, bool on) {
+static void GFX_SetPixel(uint8_t *buf, int x,int y, bool on) {
     assert(x >= 0 && x < SSD1306_WIDTH && y >=0 && y < SSD1306_HEIGHT);
 
     // The calculation to determine the correct bit to set depends on which address
@@ -227,7 +227,7 @@ static void SetPixel(uint8_t *buf, int x,int y, bool on) {
     buf[byte_idx] = byte;
 }
 // Basic Bresenhams.
-static void DrawLine(uint8_t *buf, int x0, int y0, int x1, int y1, bool on) {
+static void GFX_DrawLine(uint8_t *buf, int x0, int y0, int x1, int y1, bool on) {
 
     int dx =  abs(x1-x0);
     int sx = x0<x1 ? 1 : -1;
@@ -237,7 +237,7 @@ static void DrawLine(uint8_t *buf, int x0, int y0, int x1, int y1, bool on) {
     int e2;
 
     while (true) {
-        SetPixel(buf, x0, y0, on);
+        GFX_SetPixel(buf, x0, y0, on);
         if (x0 == x1 && y0 == y1)
             break;
         e2 = 2*err;
@@ -253,7 +253,7 @@ static void DrawLine(uint8_t *buf, int x0, int y0, int x1, int y1, bool on) {
     }
 }
 
-static inline int GetFontIndex(uint8_t ch) {
+static inline int GFX_GetFontIndex(uint8_t ch) {
     if (ch >= 'A' && ch <='Z') {
         return  ch - 'A' + 1;
     }
@@ -263,7 +263,7 @@ static inline int GetFontIndex(uint8_t ch) {
     else return  0; // Not got that char so space.
 }
 
-static void WriteChar(uint8_t *buf, int16_t x, int16_t y, uint8_t ch) {
+static void GFX_WriteChar(uint8_t *buf, int16_t x, int16_t y, uint8_t ch) {
     if (x > SSD1306_WIDTH - 8 || y > SSD1306_HEIGHT - 8)
         return;
 
@@ -271,21 +271,21 @@ static void WriteChar(uint8_t *buf, int16_t x, int16_t y, uint8_t ch) {
     y = y/8;
 
     ch = toupper(ch);
-    int idx = GetFontIndex(ch);
+    int idx = GFX_GetFontIndex(ch);
     int fb_idx = y * 128 + x;
 
     for (int i=0;i<8;i++) {
-        buf[fb_idx++] = font[idx * 8 + i];
+        buf[fb_idx++] = GFX_font[idx * 8 + i];
     }
 }
 
-static void WriteString(uint8_t *buf, int16_t x, int16_t y, char *str) {
+static void GFX_WriteString(uint8_t *buf, int16_t x, int16_t y, char *str) {
     // Cull out any string off the screen
     if (x > SSD1306_WIDTH - 8 || y > SSD1306_HEIGHT - 8)
         return;
 
     while (*str) {
-        WriteChar(buf, x, y, *str++);
+        GFX_WriteChar(buf, x, y, *str++);
         x+=8;
     }
 }
