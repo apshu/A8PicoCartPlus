@@ -70,17 +70,7 @@
 #define SSD1306_WRITE_MODE         _u(0xFE)
 #define SSD1306_READ_MODE          _u(0xFF)
 
-
-struct GFX_render_area {
-    uint8_t start_col;
-    uint8_t end_col;
-    uint8_t start_page;
-    uint8_t end_page;
-
-    int buflen;
-};
-
-void GFX_calc_render_area_buflen(struct GFX_render_area *area) {
+void GFX_calc_render_area_buflen(GFX_render_area_t *area) {
     // calculate how long the flattened buffer will be for a render area
     area->buflen = (area->end_col - area->start_col + 1) * (area->end_page - area->start_page + 1);
 }
@@ -186,7 +176,7 @@ void SSD1306_scroll(bool on) {
     SSD1306_send_cmd_list(cmds, count_of(cmds));
 }
 
-void SSD1306_render(uint8_t *buf, struct GFX_render_area *area) {
+void SSD1306_render(uint8_t *buf, GFX_render_area_t *area) {
     // update a portion of the display with a render area
     uint8_t cmds[] = {
         SSD1306_SET_COL_ADDR,
