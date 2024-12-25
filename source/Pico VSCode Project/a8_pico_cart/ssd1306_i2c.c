@@ -63,10 +63,6 @@
 #define SSD1306_SET_COM_PIN_CFG     _u(0xDA)
 #define SSD1306_SET_VCOM_DESEL      _u(0xDB)
 
-#define SSD1306_PAGE_HEIGHT         _u(8)
-#define SSD1306_NUM_PAGES           (SSD1306_HEIGHT / SSD1306_PAGE_HEIGHT)
-#define SSD1306_BUF_LEN             (SSD1306_NUM_PAGES * SSD1306_WIDTH)
-
 #define SSD1306_WRITE_MODE         _u(0xFE)
 #define SSD1306_READ_MODE          _u(0xFF)
 
