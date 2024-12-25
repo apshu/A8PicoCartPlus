@@ -70,17 +70,7 @@
 #define SSD1306_WRITE_MODE         _u(0xFE)
 #define SSD1306_READ_MODE          _u(0xFF)
 
-
-struct GFX_render_area {
-    uint8_t start_col;
-    uint8_t end_col;
-    uint8_t start_page;
-    uint8_t end_page;
-
-    int buflen;
-};
-
-void GFX_calc_render_area_buflen(struct GFX_render_area *area) {
+void GFX_calc_render_area_buflen(GFX_render_area_t *area) {
     // calculate how long the flattened buffer will be for a render area
     area->buflen = (area->end_col - area->start_col + 1) * (area->end_page - area->start_page + 1);
 }
@@ -186,7 +176,7 @@ void SSD1306_scroll(bool on) {
     SSD1306_send_cmd_list(cmds, count_of(cmds));
 }
 
-void SSD1306_render(uint8_t *buf, struct GFX_render_area *area) {
+void SSD1306_render(uint8_t *buf, GFX_render_area_t *area) {
     // update a portion of the display with a render area
     uint8_t cmds[] = {
         SSD1306_SET_COL_ADDR,
@@ -201,7 +191,7 @@ void SSD1306_render(uint8_t *buf, struct GFX_render_area *area) {
     SSD1306_send_buf(buf, area->buflen);
 }
 
-static void GFX_SetPixel(uint8_t *buf, int x,int y, bool on) {
+void GFX_SetPixel(uint8_t *buf, int x,int y, bool on) {
     assert(x >= 0 && x < SSD1306_WIDTH && y >=0 && y < SSD1306_HEIGHT);
 
     // The calculation to determine the correct bit to set depends on which address
@@ -227,7 +217,7 @@ static void GFX_SetPixel(uint8_t *buf, int x,int y, bool on) {
     buf[byte_idx] = byte;
 }
 // Basic Bresenhams.
-static void GFX_DrawLine(uint8_t *buf, int x0, int y0, int x1, int y1, bool on) {
+void GFX_DrawLine(uint8_t *buf, int x0, int y0, int x1, int y1, bool on) {
 
     int dx =  abs(x1-x0);
     int sx = x0<x1 ? 1 : -1;
@@ -263,7 +253,7 @@ static inline int GFX_GetFontIndex(uint8_t ch) {
     else return  0; // Not got that char so space.
 }
 
-static void GFX_WriteChar(uint8_t *buf, int16_t x, int16_t y, uint8_t ch) {
+void GFX_WriteChar(uint8_t *buf, int16_t x, int16_t y, uint8_t ch) {
     if (x > SSD1306_WIDTH - 8 || y > SSD1306_HEIGHT - 8)
         return;
 
@@ -279,7 +269,7 @@ static void GFX_WriteChar(uint8_t *buf, int16_t x, int16_t y, uint8_t ch) {
     }
 }
 
-static void GFX_WriteString(uint8_t *buf, int16_t x, int16_t y, char *str) {
+void GFX_WriteString(uint8_t *buf, int16_t x, int16_t y, char *str) {
     // Cull out any string off the screen
     if (x > SSD1306_WIDTH - 8 || y > SSD1306_HEIGHT - 8)
         return;
