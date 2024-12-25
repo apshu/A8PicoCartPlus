@@ -20,17 +20,13 @@ include(pico_sdk_import.cmake)
 
 project(a8_pico_cart)
 
+# 16megs of flash on purple pico clones
 set(PICO_BOARD weact_studio_rp2040_16mb CACHE STRING "Board type")
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 add_executable(a8_pico_cart)
-
-# 16megs of flash on purple pico clones
-target_compile_definitions(a8_pico_cart PRIVATE
-    PICO_FLASH_SIZE_BYTES=16777216
-)
 
 #pico_set_linker_script(a8_pico_cart ${CMAKE_CURRENT_SOURCE_DIR}/memmap_custom.ld)
 
