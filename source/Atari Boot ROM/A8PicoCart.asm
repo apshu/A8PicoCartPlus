@@ -1211,7 +1211,7 @@ Loop
 
 ; ************************ DATA ****************************
 	.local menu_text1
-	.byte "   _   ___ ___ _       ___          _   "
+	.byte "   _   ___ ___ _       ___          _  +"
 	.endl
 	.local menu_text2
 	.byte "  /_\ ( _ ) _ (_)__ _ / __|__ _ _ _| |_ "
@@ -1223,7 +1223,7 @@ Loop
 	.byte "/_/ \_\___/_| |_\__\_/\___\__,_|_|  \__)"
 	.endl
 	.local menu_text5
-	.byte "                Electrotrains 09/29/2024"
+	.byte "                  Electrotrains Jan/2025"
 	.endl
 	.local menu_text_bottom
 	.byte $DD,'/',$DC,'/Return=Sel ',$DE,'/Esc=Back B=Boot F=Find '
