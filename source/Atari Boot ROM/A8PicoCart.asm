@@ -231,6 +231,21 @@ patch_boot
 	jsr reset_flash_prompt
 @
 
+; Get autoboot file item ID
+get_autoboot_info
+	lda #CART_CMD_GET_AUTOBOOT_INFO
+	jsr wait_for_cart
+	lda $D501 ;Move get autoboot file name result to A
+	beq @+1 ;Result is zero, skip autoboot
+	cmp #2 ; Result is 2 or above, display error message
+	bcs @+ ; jump to display error if A >= 2
+	mva #1 num_dir_entries
+	mva $D502 cur_item
+	jmp return_pressed
+@
+	jsr display_error_msg_from_cart
+@
+ 
 ; read directory
 read_current_directory
 	mva #0 search_results_mode
