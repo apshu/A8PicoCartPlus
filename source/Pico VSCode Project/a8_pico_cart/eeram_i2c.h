@@ -14,10 +14,10 @@ extern "C" {
 #endif
 
     typedef enum {
-        A1A2_LL,
-        A1A2_LH,
-        A1A2_HL,
-        A1A2_HH,
+        EERAMI2C_A1A2_LL,
+        EERAMI2C_A1A2_LH,
+        EERAMI2C_A1A2_HL,
+        EERAMI2C_A1A2_HH,
     } EERAMI2C_A1A2_e;
 
     typedef union  __attribute__((packed)) {
