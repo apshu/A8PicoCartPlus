@@ -23,6 +23,7 @@ CART_CMD_GET_DIR_ENTRY = $2
 CART_CMD_UP_DIR = $3
 CART_CMD_ROOT_DIR = $4
 CART_CMD_SEARCH = $5
+CART_CMD_GET_AUTOBOOT_INFO = $6
 CART_CMD_LOAD_SOFT_OS = $10
 CART_CMD_SOFT_OS_CHUNK = $11
 CART_CMD_RESET_FLASH = $F0
@@ -226,9 +227,10 @@ patch_boot
 	
 ; check for trigger pressed on startup to reset flash on cartridge
 	lda Trig0
-	bne read_current_directory
+	bne @+
 	jsr reset_flash_prompt
-	
+@
+
 ; read directory
 read_current_directory
 	mva #0 search_results_mode
