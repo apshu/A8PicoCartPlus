@@ -1980,7 +1980,7 @@ void __not_in_flash_func(atari_cart_main)()
 					// EERAM access failed, check if IC available
 					if (!(EERAMI2C_isChipDetected(EERAMI2C_A1A2_LL) || EERAMI2C_isChipDetected(EERAMI2C_A1A2_HH))) { // Can't detect chip at any known address
 						cart_d5xx[0x01] = 2;	// Autoboot error
-						strcpy((char*)&cart_d5xx[0x02], "No EERAM IC"); // ERROR message
+						strcpy((char*)&cart_d5xx[0x02], "No EERAM IC detected"); // ERROR message
 					} // else { // IC available, but no autoboot button pressed, skip autoboot }
 				}
 			}
