@@ -1946,8 +1946,8 @@ void __not_in_flash_func(atari_cart_main)()
 							// Reset dir entry
 							memset(entry, 0 , sizeof(DIR_ENTRY));
 							// Copy from EERAM to dir_entry
-							strcpy(entry->full_path, eeramDataBuf.autobootFilePath.full_path);
-							strcpy(entry->filename, eeramDataBuf.autobootFilePath.filename);
+							strncpy(entry->full_path, eeramDataBuf.autobootFilePath.full_path, sizeof(entry->full_path) - 1); // whole str buffer empty, last 0 preserved
+							strncpy(entry->filename, eeramDataBuf.autobootFilePath.filename, sizeof(entry->filename) - 1); // whole str buffer empty, last 0 preserved
 							cart_d5xx[0x01] = 1;	// try booting direntry[cart_d5xx[2]]
 						}
 					}
