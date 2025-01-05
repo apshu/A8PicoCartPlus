@@ -65,6 +65,18 @@ bool EERAMI2C_writeBuffer(const void *buf, uint16_t bufLen, uint16_t to_address,
     return false;
 }
 
+bool EERAMI2C_verifiedWriteBuffer(const void *buf, uint16_t bufLen, uint16_t to_address, EERAMI2C_A1A2_e chip_addr) {
+    if (EERAMI2C_writeBuffer(buf, bufLen, to_address, chip_addr)) {
+        // Written. Let's verify
+        uint8_t readBuf[bufLen];
+        if (EERAMI2C_readBuffer(readBuf, bufLen, to_address, chip_addr)) {
+            // Read complete, compare
+            return (!memcmp(buf, readBuf, bufLen));
+        }
+    }
+    return false;  //Read or write fail
+}
+
 static bool EERAMI2C_controlWrite(EERAMI2C_A1A2_e chip_addr, uint8_t reg_addr, uint8_t data) {
     invalid_params_if(EERAMI2C, chip_addr > 3);
     if (EERAMI2C_i2c) {
