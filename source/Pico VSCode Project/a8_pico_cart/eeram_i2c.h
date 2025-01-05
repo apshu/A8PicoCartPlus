@@ -35,6 +35,7 @@ extern "C" {
     bool EERAMI2C_isChipDetected(EERAMI2C_A1A2_e chip_addr);
     bool EERAMI2C_readBuffer(void *buf, uint16_t bufLen, uint16_t from_address, EERAMI2C_A1A2_e chip_addr);
     bool EERAMI2C_writeBuffer(const void *buf, uint16_t bufLen, uint16_t to_address, EERAMI2C_A1A2_e chip_addr);
+    bool EERAMI2C_verifiedWriteBuffer(const void *buf, uint16_t bufLen, uint16_t to_address, EERAMI2C_A1A2_e chip_addr);
     bool EERAMI2C_storeNow(EERAMI2C_A1A2_e chip_addr);
     bool EERAMI2C_recallNow(EERAMI2C_A1A2_e chip_addr);
     bool EERAMI2C_readStatusReg(EERAMI2C_status_reg_t *status_reg, EERAMI2C_A1A2_e chip_addr);
