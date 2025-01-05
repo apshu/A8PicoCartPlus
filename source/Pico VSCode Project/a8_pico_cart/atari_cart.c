@@ -1984,6 +1984,16 @@ void __not_in_flash_func(atari_cart_main)()
 					} // else { // IC available, but no autoboot button pressed, skip autoboot }
 				}
 			}
+			if (cart_d5xx[0x01] == 1) { // Check if autoboot execution intended
+				// Sanity check on AB request
+				*curPath = 0; // Autoboot file entries always start from root
+				DIR_ENTRY *entry = (DIR_ENTRY *)cart_ram + cart_d5xx[2];
+				if (!is_valid_file(entry->filename)) {  // Verify if compatible file specified
+					// Can't boot this type of file
+					cart_d5xx[0x01] = 2;	// Autoboot error
+					strcpy((char*)&cart_d5xx[0x02], "Autoboot invalid filename"); // ERROR message
+				}
+			}
 		}
     }
 }
