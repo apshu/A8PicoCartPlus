@@ -1891,8 +1891,10 @@ void __not_in_flash_func(atari_cart_main)()
 			}
 		}
 		// RESET FLASH FS (when boot with joystick 0 fire pressed)
-		else if (cmd == CART_CMD_RESET_FLASH)
+		else if (cmd == CART_CMD_RESET_FLASH) {
 			create_fatfs_disk();
+			reset_eeram(true); // Reset EERAM regardless of NOAUTOBOOT button
+		}
 		// NO CART
 		else if (cmd == CART_CMD_NO_CART)
 			cartType = 0;

@@ -99,8 +99,12 @@ int main(void)
 void tud_mount_cb(void)
 {
   printf("Device mounted\n"); 
-  if (!mount_fatfs_disk())
+  if (!mount_fatfs_disk()) {
+    // Issues with FS, complete FS format
     create_fatfs_disk();
+    // Reset EERAM regardless of NOAUTOBOOT button
+    reset_eeram(true); 
+  }
 }
 
 // Invoked when device is unmounted
