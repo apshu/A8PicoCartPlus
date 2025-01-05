@@ -79,6 +79,7 @@ char errorBuf[40];
 #define CART_CMD_UP_DIR				0x03
 #define CART_CMD_ROOT_DIR			0x04
 #define CART_CMD_SEARCH				0x05
+#define CART_CMD_GET_AUTOBOOT_INFO	0x06
 #define CART_CMD_LOAD_SOFT_OS		0x10
 #define CART_CMD_SOFT_OS_CHUNK		0x11
 #define CART_CMD_MOUNT_ATR			0x20	// unused, done automatically by firmware
@@ -1846,6 +1847,11 @@ void __not_in_flash_func(atari_cart_main)()
 			}
 			else
 				emulate_cartridge(cartType);
+		}
+		// AUTOBOOT (Get Autoboot filename and reply item ID)
+		else if (cmd == CART_CMD_GET_AUTOBOOT_INFO) {
+			// Autoboot result
+			cart_d5xx[0x01] = 0;	// Skip autoboot
 		}
     }
 }
