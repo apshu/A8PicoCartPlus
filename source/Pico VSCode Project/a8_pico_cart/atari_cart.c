@@ -210,6 +210,12 @@ int entry_compare(const void* p1, const void* p2)
 	else return strcasecmp(e1->long_filename, e2->long_filename);
 }
 
+char *get_filename(char *fullpath) {
+    char *dirsep = strrchr(fullpath, '/');
+    if(!dirsep || dirsep == fullpath) return "";
+    return dirsep + 1;
+}
+
 char *get_filename_ext(char *filename) {
     char *dot = strrchr(filename, '.');
     if(!dot || dot == filename) return "";
