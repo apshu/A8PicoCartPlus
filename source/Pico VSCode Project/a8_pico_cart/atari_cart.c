@@ -212,7 +212,7 @@ int entry_compare(const void* p1, const void* p2)
 
 char *get_filename(char *fullpath) {
     char *dirsep = strrchr(fullpath, '/');
-    if(!dirsep || dirsep == fullpath) return "";
+    if(!dirsep) return fullpath;
     return dirsep + 1;
 }
 
