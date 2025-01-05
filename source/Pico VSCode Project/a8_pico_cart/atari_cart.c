@@ -138,6 +138,18 @@ typedef struct {
 	char full_path[210];
 } DIR_ENTRY;	// 256 bytes = 256 entries in 64k
 
+#define EERAM_DATA_VALID_MAGIC_PATTERN 	(0x5A)
+#define EERAM_AUTOBOOT_DATA_ADDRESS		(0x00)
+
+typedef struct  __attribute__((packed)) {
+	uint8_t dataValidMagic; // valid if == EERAM_DATA_VALID_MAGIC_PATTERN
+	uint8_t fullPathChecksum; // 2's complement sum of all bytes of full_path(CSUM+sum(autobootFilePath) == 0)
+	struct {
+		char filename[sizeof(((DIR_ENTRY*)0)->filename)];
+		char full_path[sizeof(((DIR_ENTRY*)0)->full_path)]; // isDir must be false. full_path must be longer than 0
+	} autobootFilePath;
+} EERAM_storage_t;
+
 int num_dir_entries = 0; // how many entries in the current directory
 
 int entry_compare(const void* p1, const void* p2)
