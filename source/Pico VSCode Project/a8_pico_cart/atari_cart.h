@@ -20,5 +20,6 @@
 #define DEFAULT_I2C_CLK_SPEED       (400*1000) // Default I2C speed is 400kHz
 
 void atari_cart_main();
+bool reset_eeram(bool eraseIfDisabledAutoboot);
 
 #endif

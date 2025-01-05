@@ -152,6 +152,53 @@ typedef struct  __attribute__((packed)) {
 	} autobootFilePath;
 } EERAM_storage_t;
 
+bool reset_eeram(bool eraseIfDisabledAutoboot) {
+	EERAMI2C_A1A2_e chipAddr = EERAMI2C_A1A2_LL; // Assume erase at default address
+	if (eraseIfDisabledAutoboot) {
+		// Erase at high and low chip addresses
+		// First try to erase at the default address
+		if (reset_eeram(false)) {
+			// EERAM found and erased at default address
+			return true;
+		}
+		// EERAM reset fail at default address. Try to erase at high address.
+		chipAddr = EERAMI2C_A1A2_HH;
+	}
+	// Setup autostore (STATUS.ASE = 1)
+	EERAMI2C_status_reg_t eeramStatus;
+	if (EERAMI2C_readStatusReg(&eeramStatus, chipAddr) ) {
+		// Status read success
+		if (!eeramStatus.ASE || (eeramStatus.BP > 6)) { // ASE is not set or BP covers too many bytes 
+			// ASE not set or BP invalid!
+			eeramStatus.ASE = 1;
+			eeramStatus.BP = MIN(eeramStatus.BP, 6); // Keep old BP value if acceptable
+			if (EERAMI2C_writeStatusReg(eeramStatus, chipAddr)) {
+				// Status written, verify
+				if (EERAMI2C_readStatusReg(&eeramStatus, chipAddr) ) {
+					if (!eeramStatus.ASE || (eeramStatus.BP > 6)) { // Check only ASE and BP
+						// status write not successful. Abort with fail code
+						return false;
+					} // ASE set and successfully verified, continue
+				} else {
+					// status read not successful. Abort with fail code
+					return false;
+				}
+			} else {
+				// status write not successful. Abort with fail code
+				return false;
+			}
+		}
+		// ASE and BP set correctly (+verified)
+		EERAM_storage_t eeramDataBuf;
+		// 0xFF is the empty EEPROM value
+		memset(&eeramDataBuf, 0xFF, sizeof(eeramDataBuf));
+		// Write to EERAM
+		return EERAMI2C_verifiedWriteBuffer(&eeramDataBuf, sizeof(eeramDataBuf), EERAM_AUTOBOOT_DATA_ADDRESS, chipAddr);
+	} // status read not successful. Abort with fail code
+	// EERAM reset fail
+	return false;
+}
+
 int num_dir_entries = 0; // how many entries in the current directory
 
 int entry_compare(const void* p1, const void* p2)
