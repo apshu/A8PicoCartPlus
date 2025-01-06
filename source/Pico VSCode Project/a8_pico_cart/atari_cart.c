@@ -1782,6 +1782,17 @@ void __not_in_flash_func(atari_cart_main)()
 					strcpy(path, entry[n].full_path);	// search result
 				else
 					strcpy(path, curPath); // file in current directory
+				// Reset EERAM file name storage buffer
+				memset(&eeramDataBuf.autobootFilePath, 0, sizeof(eeramDataBuf.autobootFilePath));
+				// Save path and file name for eeram Data Buffer
+				strncpy(eeramDataBuf.autobootFilePath.full_path, path, sizeof(eeramDataBuf.autobootFilePath.full_path) - 1);
+				strncat(eeramDataBuf.autobootFilePath.filename, entry[n].filename, sizeof(eeramDataBuf.autobootFilePath.filename) - 1);
+				// Calculate EERAM file name dataset checksum
+				eeramDataBuf.fullPathChecksum=0;
+				for(int i=0; i<sizeof(eeramDataBuf.autobootFilePath); ++i) {
+					eeramDataBuf.fullPathChecksum += ((uint8_t *)&eeramDataBuf.autobootFilePath)[i];
+				}
+				eeramDataBuf.fullPathChecksum = -eeramDataBuf.fullPathChecksum; // Two's complement
 				strcat(path, "/");
 				strcat(path, entry[n].filename);
 				if (strcasecmp(get_filename_ext(entry[n].filename), "ATR")==0)
@@ -1908,7 +1919,16 @@ void __not_in_flash_func(atari_cart_main)()
 		// REBOOT TO CART
 		else if (cmd == CART_CMD_ACTIVATE_CART)
 		{
-			// Execute current cart. Save the executeable info to EERAM autoboot
+			// Execute current cart.			
+			// Save the executeable info to EERAM for next autoboot
+			// Make sure data written will be invalid until verified
+			eeramDataBuf.dataValidMagic = ~EERAM_DATA_VALID_MAGIC_PATTERN; 
+			if (EERAMI2C_verifiedWriteBuffer(&eeramDataBuf, sizeof(eeramDataBuf), EERAM_AUTOBOOT_DATA_ADDRESS, EERAMI2C_A1A2_LL)) {
+				// Dataset successfully written and verified, but state intentionally "invalid" in EERAM
+				eeramDataBuf.dataValidMagic = EERAM_DATA_VALID_MAGIC_PATTERN; // Valid data verified in EERAM
+				// Store validation flag to EERAM
+				EERAMI2C_writeBuffer(&eeramDataBuf.dataValidMagic, 1, EERAM_AUTOBOOT_DATA_ADDRESS + ((ptrdiff_t)&eeramDataBuf.dataValidMagic - (ptrdiff_t)&eeramDataBuf), EERAMI2C_A1A2_LL);
+			}
 			if (cartType == CART_TYPE_ATR) {
 				atrMode = 1;
 				int ret = mount_atr(path);
