@@ -1921,77 +1921,79 @@ void __not_in_flash_func(atari_cart_main)()
 		else if (cmd == CART_CMD_GET_AUTOBOOT_INFO) {
 			// Autoboot result
 			cart_d5xx[0x01] = 0;	// Skip autoboot
-			bool fsBasedAutoboot = false;
-			// Try if autoboot specified on the filesystem
-			if (f_mount(&FatFs, "", 1) == FR_OK) {
-				FIL fil;
-				if (f_open(&fil, "AUTOBOOT", FA_READ) == FR_OK) {
-					// Autboot specified in file
-					fsBasedAutoboot = true;
-					if (f_gets(path, sizeof(path), &fil) && *path) {
-						// Non-empty string read from AUTOBOOT file
-						cart_d5xx[0x01] = 1;	// Try autoboot
-						// Using 0th dir entry for autoboot
-						cart_d5xx[2] = 0;
-						DIR_ENTRY *entry = (DIR_ENTRY *)cart_ram + cart_d5xx[2];
-						// Reset dir entry
-						memset(entry, 0 , sizeof(DIR_ENTRY));
-						// Filename to dir_entry
-						strncpy(entry->filename, get_filename(path), sizeof(entry->filename) - 1); // whole str buffer empty, last 0 preserved
-						// Path to dir entry
-						char *pathsep = strrchr(path, '/');
-						if (pathsep) {
-							*pathsep = 0; // terminate path string at last directory separator
-							strncpy(entry->full_path, path, sizeof(entry->full_path) - 1); // Copy filename path part, whole str buffer empty, last 0 preserved
-						}
-					}
-				}
-			}
-			if (!fsBasedAutoboot) {
-				// Autoboot based on EERAM
-				EERAM_storage_t eeramDataBuf;
-				// Try to load autoboot data from EERAM from no button pressed address
-				if (EERAMI2C_readBuffer((uint8_t *)&eeramDataBuf, sizeof(eeramDataBuf), EERAM_AUTOBOOT_DATA_ADDRESS, EERAMI2C_A1A2_LL)) {
-					// Got data from EERAM
-					if (eeramDataBuf.dataValidMagic == EERAM_DATA_VALID_MAGIC_PATTERN) {
-						// Data write is completed before shutdown
-						// Calculate checksum
-						for (int i=0; i<sizeof(eeramDataBuf.autobootFilePath); ++i) {
-							eeramDataBuf.fullPathChecksum += ((uint8_t*)&eeramDataBuf.autobootFilePath)[i];
-						}
-						if (eeramDataBuf.fullPathChecksum) {
-							// Bad checksum
-							cart_d5xx[0x01] = 2;	// Autoboot cheksum error
-							strcpy((char*)&cart_d5xx[0x02], "EERAM bad CSUM"); // ERROR message
-						} else {
-							// eeramDataBuf contains valid autoboot information
+			if (!EERAMI2C_isChipDetected(EERAMI2C_A1A2_HH)) { // Check if the NO AUTOBOOT button is pressed
+				bool fsBasedAutoboot = false;
+				// Try if autoboot specified on the filesystem
+				if (f_mount(&FatFs, "", 1) == FR_OK) {
+					FIL fil;
+					if (f_open(&fil, "AUTOBOOT", FA_READ) == FR_OK) {
+						// Autboot specified in file
+						fsBasedAutoboot = true;
+						if (f_gets(path, sizeof(path), &fil) && *path) {
+							// Non-empty string read from AUTOBOOT file
+							cart_d5xx[0x01] = 1;	// Try autoboot
 							// Using 0th dir entry for autoboot
 							cart_d5xx[2] = 0;
 							DIR_ENTRY *entry = (DIR_ENTRY *)cart_ram + cart_d5xx[2];
 							// Reset dir entry
 							memset(entry, 0 , sizeof(DIR_ENTRY));
-							// Copy from EERAM to dir_entry
-							strncpy(entry->full_path, eeramDataBuf.autobootFilePath.full_path, sizeof(entry->full_path) - 1); // whole str buffer empty, last 0 preserved
-							strncpy(entry->filename, eeramDataBuf.autobootFilePath.filename, sizeof(entry->filename) - 1); // whole str buffer empty, last 0 preserved
-							cart_d5xx[0x01] = 1;	// try booting direntry[cart_d5xx[2]]
+							// Filename to dir_entry
+							strncpy(entry->filename, get_filename(path), sizeof(entry->filename) - 1); // whole str buffer empty, last 0 preserved
+							// Path to dir entry
+							char *pathsep = strrchr(path, '/');
+							if (pathsep) {
+								*pathsep = 0; // terminate path string at last directory separator
+								strncpy(entry->full_path, path, sizeof(entry->full_path) - 1); // Copy filename path part, whole str buffer empty, last 0 preserved
+							}
 						}
 					}
-				} else {
-					// EERAM access failed, check if IC available
-					if (!(EERAMI2C_isChipDetected(EERAMI2C_A1A2_LL) || EERAMI2C_isChipDetected(EERAMI2C_A1A2_HH))) { // Can't detect chip at any known address
-						cart_d5xx[0x01] = 2;	// Autoboot error
-						strcpy((char*)&cart_d5xx[0x02], "No EERAM IC detected"); // ERROR message
-					} // else { // IC available, but no autoboot button pressed, skip autoboot }
 				}
-			}
-			if (cart_d5xx[0x01] == 1) { // Check if autoboot execution intended
-				// Sanity check on AB request
-				*curPath = 0; // Autoboot file entries always start from root
-				DIR_ENTRY *entry = (DIR_ENTRY *)cart_ram + cart_d5xx[2];
-				if (!is_valid_file(entry->filename)) {  // Verify if compatible file specified
-					// Can't boot this type of file
-					cart_d5xx[0x01] = 2;	// Autoboot error
-					strcpy((char*)&cart_d5xx[0x02], "Autoboot invalid filename"); // ERROR message
+				if (!fsBasedAutoboot) {
+					// Autoboot based on EERAM
+					EERAM_storage_t eeramDataBuf;
+					// Try to load autoboot data from EERAM from no button pressed address
+					if (EERAMI2C_readBuffer((uint8_t *)&eeramDataBuf, sizeof(eeramDataBuf), EERAM_AUTOBOOT_DATA_ADDRESS, EERAMI2C_A1A2_LL)) {
+						// Got data from EERAM
+						if (eeramDataBuf.dataValidMagic == EERAM_DATA_VALID_MAGIC_PATTERN) {
+							// Data write is completed before shutdown
+							// Calculate checksum
+							for (int i=0; i<sizeof(eeramDataBuf.autobootFilePath); ++i) {
+								eeramDataBuf.fullPathChecksum += ((uint8_t*)&eeramDataBuf.autobootFilePath)[i];
+							}
+							if (eeramDataBuf.fullPathChecksum) {
+								// Bad checksum
+								cart_d5xx[0x01] = 2;	// Autoboot cheksum error
+								strcpy((char*)&cart_d5xx[0x02], "EERAM bad CSUM"); // ERROR message
+							} else {
+								// eeramDataBuf contains valid autoboot information
+								// Using 0th dir entry for autoboot
+								cart_d5xx[2] = 0;
+								DIR_ENTRY *entry = (DIR_ENTRY *)cart_ram + cart_d5xx[2];
+								// Reset dir entry
+								memset(entry, 0 , sizeof(DIR_ENTRY));
+								// Copy from EERAM to dir_entry
+								strncpy(entry->full_path, eeramDataBuf.autobootFilePath.full_path, sizeof(entry->full_path) - 1); // whole str buffer empty, last 0 preserved
+								strncpy(entry->filename, eeramDataBuf.autobootFilePath.filename, sizeof(entry->filename) - 1); // whole str buffer empty, last 0 preserved
+								cart_d5xx[0x01] = 1;	// try booting direntry[cart_d5xx[2]]
+							}
+						}
+					} else {
+						// EERAM access failed, check if IC available
+						if (!(EERAMI2C_isChipDetected(EERAMI2C_A1A2_LL) || EERAMI2C_isChipDetected(EERAMI2C_A1A2_HH))) { // Can't detect chip at any known address
+							cart_d5xx[0x01] = 2;	// Autoboot error
+							strcpy((char*)&cart_d5xx[0x02], "No EERAM IC detected"); // ERROR message
+						} // else { // IC available, but no autoboot button pressed, skip autoboot }
+					}
+				}
+				if (cart_d5xx[0x01] == 1) { // Check if autoboot execution intended
+					// Sanity check on AB request
+					*curPath = 0; // Autoboot file entries always start from root
+					DIR_ENTRY *entry = (DIR_ENTRY *)cart_ram + cart_d5xx[2];
+					if (!is_valid_file(entry->filename)) {  // Verify if compatible file specified
+						// Can't boot this type of file
+						cart_d5xx[0x01] = 2;	// Autoboot error
+						strcpy((char*)&cart_d5xx[0x02], "Autoboot invalid filename"); // ERROR message
+					}
 				}
 			}
 		}
