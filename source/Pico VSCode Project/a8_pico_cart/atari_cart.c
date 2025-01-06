@@ -152,6 +152,8 @@ typedef struct  __attribute__((packed)) {
 	} autobootFilePath;
 } EERAM_storage_t;
 
+EERAM_storage_t eeramDataBuf;
+
 bool reset_eeram(bool eraseIfDisabledAutoboot) {
 	EERAMI2C_A1A2_e chipAddr = EERAMI2C_A1A2_LL; // Assume erase at default address
 	if (eraseIfDisabledAutoboot) {
@@ -189,7 +191,6 @@ bool reset_eeram(bool eraseIfDisabledAutoboot) {
 			}
 		}
 		// ASE and BP set correctly (+verified)
-		EERAM_storage_t eeramDataBuf;
 		// 0xFF is the empty EEPROM value
 		memset(&eeramDataBuf, 0xFF, sizeof(eeramDataBuf));
 		// Write to EERAM
@@ -1907,6 +1908,7 @@ void __not_in_flash_func(atari_cart_main)()
 		// REBOOT TO CART
 		else if (cmd == CART_CMD_ACTIVATE_CART)
 		{
+			// Execute current cart. Save the executeable info to EERAM autoboot
 			if (cartType == CART_TYPE_ATR) {
 				atrMode = 1;
 				int ret = mount_atr(path);
@@ -1950,7 +1952,6 @@ void __not_in_flash_func(atari_cart_main)()
 				}
 				if (!fsBasedAutoboot) {
 					// Autoboot based on EERAM
-					EERAM_storage_t eeramDataBuf;
 					// Try to load autoboot data from EERAM from no button pressed address
 					if (EERAMI2C_readBuffer((uint8_t *)&eeramDataBuf, sizeof(eeramDataBuf), EERAM_AUTOBOOT_DATA_ADDRESS, EERAMI2C_A1A2_LL)) {
 						// Got data from EERAM
