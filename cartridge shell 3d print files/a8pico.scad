@@ -1,13 +1,9 @@
+include <a8pico_dimensions.scad>
 use <a8pico_back_v2.scad>
 use <a8pico_front.scad>
 
-ridge_width = 0.5;
-cart_width=65 - (ridge_width*2);
-
-module logo()
-{
-// FIXME TBD?
-}
+/* [Rendering:] */
+item = 3; // [0:Assembly, 1:Front, 2:Back, 3:3d print]
 
 module assembly()
 {
@@ -17,8 +13,6 @@ module assembly()
         rotate([180,0,0])
             front();
 }
-
-item = 0;
 
 if (item == 0) {
     assembly();
@@ -33,10 +27,6 @@ if (item == 2) {
 }
 
 if (item == 3) {
-    logo();
-}
-
-if (item == 4) {
     front();
     translate([0,cart_width+10,0]) {
         back();
