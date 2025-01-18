@@ -1,13 +1,13 @@
-FRONT_STL=a8pico_front.stl
-BACK_STL=a8pico_back_v2.stl
-COMBINED_STL=a8pico_combined.stl
+FRONT_STL=a8picoplus_front.stl
+BACK_STL=a8picoplus_back.stl
+COMBINED_STL=a8picoplus_combined.stl
 
-MAIN_SCAD=a8pico.scad
+MAIN_SCAD=a8picoplus_shell.scad
 
 SCAD_MODULES=\
-	a8pico_back_v2.scad\
-	a8pico_front.scad\
-	a8pico_dimensions.scad\
+	a8picoplus_back.scad\
+	a8picoplus_front.scad\
+	a8picoplus_dimensions.scad\
 	cube_round.scad
 
 
