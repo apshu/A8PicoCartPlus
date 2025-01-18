@@ -4,7 +4,6 @@ module cube_round(dim=[1,1,1],r=0.3, fn = 16, round_top = true)
     assert(dim[0]>=2*r);
     assert(dim[1]>=2*r);
     assert(dim[2]>=2*r);
-    echo ("round cube",dim,r,fn);
     hull() {
         translate([r,r,r])
         sphere(r=r, $fn=fn);
