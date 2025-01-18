@@ -22,7 +22,7 @@
 	"_7": "Altirra command line parameters for developing a cartridge",
 	"bridgeParams": {
 		"altirraExecutable": "D:\\Games\\Altirra\\Altirra64.exe",
-		"bptList": ["A001","read_joystick.done"],
+		"bptList": ["start.get_autoboot_info"],
 		"altirraDebugArgumentTemplate": "/cartmapper 1 /cart {' '.join(args[1:])} /debugcmd:\\\".sourcemode on\\\" {' '.join(map('/debugcmd:\"bp {}\"'.format, getattr(config.bridgeParams, 'bptList', [])))}",
 		"altirraArgumentTemplate": "/cartmapper 1 /cart {' '.join(args[1:])}"
 	}

@@ -23,6 +23,7 @@ CART_CMD_GET_DIR_ENTRY = $2
 CART_CMD_UP_DIR = $3
 CART_CMD_ROOT_DIR = $4
 CART_CMD_SEARCH = $5
+CART_CMD_GET_AUTOBOOT_INFO = $6
 CART_CMD_LOAD_SOFT_OS = $10
 CART_CMD_SOFT_OS_CHUNK = $11
 CART_CMD_RESET_FLASH = $F0
@@ -226,9 +227,25 @@ patch_boot
 	
 ; check for trigger pressed on startup to reset flash on cartridge
 	lda Trig0
-	bne read_current_directory
+	bne @+
 	jsr reset_flash_prompt
-	
+@
+
+; Get autoboot file item ID
+get_autoboot_info
+	lda #CART_CMD_GET_AUTOBOOT_INFO
+	jsr wait_for_cart
+	lda $D501 ;Move get autoboot file name result to A
+	beq @+1 ;Result is zero, skip autoboot
+	cmp #2 ; If result is 2 or above, display error message
+	bcs @+ ; jump to display error if A >= 2
+	mva #1 num_dir_entries
+	mva $D502 cur_item
+	jmp return_pressed
+@
+	jsr display_error_msg_from_cart ; display error and continue with default operation
+@
+ 
 ; read directory
 read_current_directory
 	mva #0 search_results_mode
