@@ -3,7 +3,7 @@
 */
 
 /*common ones */
-
+/* Dimensions */
 ridge_width = 0.5;
 cart_length=80;
 cart_width=65 - (ridge_width*2);
@@ -20,7 +20,6 @@ corner_fn=32;
 /* back */
 /* height of the back side part */
 cartb_height=11.5;
-
 supportb_height = 10.5;
 
 /* front */
