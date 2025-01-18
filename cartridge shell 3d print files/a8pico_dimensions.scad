@@ -24,12 +24,21 @@ supportb_height = 10.5;
 
 /* front */
 
+/* Features */
+menu_button = true;
+OLED_mount = true;
+show_logo = false;
+
 /*height of the front side part */
 cartf_height=9.6;
 supportf_height = 7.6;
 port_cut_height=10;
 logo_width = 14.5;
 logo_height = 58;
+logo_image = "a8pico_logo_plus.png";
+image_size=[363,88];
+
+
 
 
 

@@ -1,12 +1,11 @@
 /* A8PicoCart shell
    (c) R.Edwards 2023
+   A8PicCart+ shell
+   APShu 2025
 */
 
 include <a8pico_dimensions.scad>
 include <cube_round.scad>
-
-menu_button = true;
-OLED_mount = true;
 
 module front_outside()
 {
@@ -21,10 +20,6 @@ cartb_height-rim_height-1-corner_r],r=ridge_width,round_top=false);
 
 
 }
-
-// FIXME move this to dimensions
-port_cut_height=10;
-
 
 module front_inside() {
     // rims
@@ -105,7 +100,6 @@ supportf_height-sides_thickness/2]);
         front_screw_mount();
 }
 
-
 module front_logo_hole() {
 
     difference() {
@@ -116,11 +110,9 @@ module front_logo_hole() {
     }
 }
 
-logo_image = "a8pico_logo_plus.png";
-image_size=[363,88];
-
 module logo()
 {
+    echo("rendering logo");
     rect_line_width=0.5;
     logo_depth=0.6;
     scl = (logo_height-rect_line_width)/image_size[0];
@@ -134,7 +126,6 @@ module logo()
             mirror([0,1,0])
             surface(file = logo_image, center = true, invert = true);
     }
-
 }
 
 module reset_label()
@@ -168,12 +159,17 @@ module menu_label()
 module front() {
 
     difference() {
+        echo ("show_logo", show_logo);
         front_wo_logo();
         //logo rectangle
-        if (OLED_mount) {
-            translate([cart_length-28,(cart_width-logo_height)/ 2, -1]) rotate([0, 0, 90]) logo();
-        } else {
-            translate([cart_length-logo_height-3, (cart_width-logo_width)/ 2, -1]) logo();
+        echo ("show_logo", show_logo);
+        if (show_logo) {
+            echo ("rendering logo, show_logo", show_logo);
+            if (OLED_mount) {
+                translate([cart_length-28,(cart_width-logo_height)/ 2, -1]) rotate([0, 0, 90]) logo();
+            } else {
+                translate([cart_length-logo_height-3, (cart_width-logo_width)/ 2, -1]) logo();
+            }
         }
         translate([cart_length-15+5, 9, -1]) scale([0.15,0.15,1]) reset_label();
         if (menu_button) {
