@@ -5,6 +5,9 @@
 include <a8pico_dimensions.scad>
 include <cube_round.scad>
 
+menu_button = true;
+OLED_mount = true;
+
 module front_outside()
 {
     // main shell
@@ -49,6 +52,17 @@ module front_inside() {
     translate([cart_length-15, 9, -1])
         cylinder(h = front_thickness+2, r1 = 2.5, r2 = 2.5,  $fs = 1); 
 
+    // Menu button
+    if (menu_button) {
+        translate([cart_length-15, cart_width-9, -1])
+            cylinder(h = front_thickness+2, r1 = 2.5, r2 = 2.5,  $fs = 1); 
+    }
+    
+    // OLED mount
+    if (OLED_mount) {
+        translate([cart_length-15, cart_width/2, 0])
+            cube([15, 25,front_thickness*4], center=true); 
+    }
 }
 
 module front_screw_mount()
@@ -136,27 +150,42 @@ module reset_label()
     rpi_logo_scale = 0.22;
     rst_height = 1.6;
 
-    mirror([0,1,0])
-        linear_extrude(height = rst_height) {
-            translate([38,0]) 
-                text(text = str("RST"), font = font, size = 30);
-            translate([0,-8]) 
-                scale([rpi_logo_scale,rpi_logo_scale])
-                import("raspberry-logo-raspberry-pi.svg");
-        }
+    rotate([0,0,90])
+        mirror([0,1,0])
+            linear_extrude(height = rst_height) {
+                translate([-38,0]) 
+                    text(text = str("RST"), font = font, size = 30);
+            }
+}
+
+module menu_label()
+{
+    font = "Liberation Mono:style=Medium";
+    rpi_logo_scale = 0.22;
+    rst_height = 1.6;
+
+    rotate([0,0,90])
+        mirror([0,1,0])
+            linear_extrude(height = rst_height) {
+                translate([-55,0]) 
+                    text(text = str("MENU"), font = font, size = 30);
+            }
 }
 
 module front() {
 
     difference() {
         front_wo_logo();
-        // logo rectangle
-        translate([cart_length-logo_height-3, cart_width-logo_width-3.5, -1])
-        logo();
-
-        translate([cart_length-25, cart_width-46, -1])
-        scale([0.15,0.15,1])
-        reset_label();
+        //logo rectangle
+        if (OLED_mount) {
+            #translate([cart_length/2,(cart_width-logo_height)/ 2, -1]) rotate([0, 0, 90]) logo();
+        } else {
+            translate([cart_length-logo_height-3, (cart_width-logo_width)/ 2, -1]) logo();
+        }
+        translate([cart_length-15+5, 9, -1]) scale([0.15,0.15,1]) reset_label();
+        if (menu_button) {
+            translate([cart_length-15+5, cart_width-9, -1]) scale([0.15,0.15,1]) menu_label();
+        }
     }
 }
 
