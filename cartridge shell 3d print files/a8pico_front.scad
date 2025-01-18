@@ -60,8 +60,8 @@ module front_inside() {
     
     // OLED mount
     if (OLED_mount) {
-        translate([cart_length-15, cart_width/2, 0])
-            cube([15, 25,front_thickness*4], center=true); 
+        translate([cart_length-18, cart_width/2, 0])
+            cube([16, 25,front_thickness*4], center=true); 
     }
 }
 
@@ -116,7 +116,7 @@ module front_logo_hole() {
     }
 }
 
-logo_image = "a8pico_logo.png";
+logo_image = "a8pico_logo_plus.png";
 image_size=[363,88];
 
 module logo()
@@ -125,13 +125,6 @@ module logo()
     logo_depth=0.6;
     scl = (logo_height-rect_line_width)/image_size[0];
 
-    /* logo frame */
-    difference(){
-        cube([logo_height, logo_width, logo_depth+1]);
-        translate([rect_line_width,rect_line_width, -1])
-            cube([logo_height-2*rect_line_width, logo_width-2*rect_line_width,
-                logo_depth+1+2]);
-    }
     /* logo text */
     intersection(){
         cube([logo_height, logo_width, logo_depth+1]);
@@ -178,7 +171,7 @@ module front() {
         front_wo_logo();
         //logo rectangle
         if (OLED_mount) {
-            #translate([cart_length/2,(cart_width-logo_height)/ 2, -1]) rotate([0, 0, 90]) logo();
+            translate([cart_length-28,(cart_width-logo_height)/ 2, -1]) rotate([0, 0, 90]) logo();
         } else {
             translate([cart_length-logo_height-3, (cart_width-logo_width)/ 2, -1]) logo();
         }
