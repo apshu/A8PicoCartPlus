@@ -1,6 +1,5 @@
 FRONT_STL=a8pico_front.stl
 BACK_STL=a8pico_back_v2.stl
-LOGO_STL=a8pico_logo.stl
 COMBINED_STL=a8pico_combined.stl
 
 MAIN_SCAD=a8pico.scad
@@ -24,6 +23,6 @@ $(BACK_STL): $(MAIN_SCAD) $(SCAD_MODULES)
 	openscad -q -o $@ -D item=2 $<
 
 $(COMBINED_STL): $(MAIN_SCAD) $(SCAD_MODULES)
-	openscad -q -o $@ -D item=4 $<
+	openscad -q -o $@ -D item=3 $<
 
 
