@@ -45,7 +45,7 @@ module front_inside() {
     translate([-1, (cart_width-57)/2, -1])
         cube([port_cut_height+1, 57, cartf_height+2]);
 
-    // button
+    // Reset button
     translate([cart_length-15, 9, -1])
         cylinder(h = front_thickness+2, r1 = 2.5, r2 = 2.5,  $fs = 1); 
 
