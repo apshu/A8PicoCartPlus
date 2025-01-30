@@ -56,7 +56,7 @@ module front_inside() {
     // OLED mount
     if (OLED_mount) {
         translate([cart_length-18, cart_width/2, 0])
-            cube([16, 25,front_thickness*4], center=true); 
+            cube([17.6, 25.6,front_thickness*4], center=true); 
     }
 }
 
