@@ -1742,6 +1742,14 @@ void emulate_cartridge(int cartType) {
 	}
 }
 
+bool  __not_in_flash_func(load_artwork)(char *path, void* framebuffer) {
+	return false;
+}
+
+void  __not_in_flash_func(show_artwork)(void *framebuffer) {
+
+}
+
 void __not_in_flash_func(atari_cart_main)()
 {
     gpio_init_mask(ALL_GPIO_MASK);
@@ -1795,6 +1803,9 @@ void __not_in_flash_func(atari_cart_main)()
 				eeramDataBuf.fullPathChecksum = -eeramDataBuf.fullPathChecksum; // Two's complement
 				strcat(path, "/");
 				strcat(path, entry[n].filename);
+				if (load_artwork(path, cart_ram)) {
+					show_artwork(cart_ram);
+				}
 				if (strcasecmp(get_filename_ext(entry[n].filename), "ATR")==0)
 				{	// ATR
 					cart_d5xx[0x01] = 3;	// ATR
