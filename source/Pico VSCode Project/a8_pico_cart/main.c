@@ -59,6 +59,7 @@ int main(void)
   if (SSD1306_init()) {     // Init GFX display
     // Initialize render area for entire frame (SSD1306_WIDTH pixels by SSD1306_NUM_PAGES pages)
     uint8_t lcd_buf[SSD1306_BUF_LEN];
+    // zero the entire display buffer
     memset(lcd_buf, 0, SSD1306_BUF_LEN);
     GFX_render_area_t frame_area = {
       start_col: 0,
@@ -68,14 +69,11 @@ int main(void)
     };
 
     GFX_calc_render_area_buflen(&frame_area);
-    // zero the entire display buffer
-    uint8_t buf[SSD1306_BUF_LEN];
-    memset(buf, 0, SSD1306_BUF_LEN);
     // Render the text
-    GFX_WriteString(buf, 15, (SSD1306_HEIGHT>>1) - 10, "Drag and drop");
-    GFX_WriteString(buf, 20, (SSD1306_HEIGHT>>1) + 10, "Atari files");
+    GFX_WriteString(lcd_buf, 15, (SSD1306_HEIGHT>>1) - 10, "Drag and drop");
+    GFX_WriteString(lcd_buf, 20, (SSD1306_HEIGHT>>1) + 10, "Atari files");
     // Show the buffer on screen
-    SSD1306_render(buf, &frame_area);
+    SSD1306_render(lcd_buf, &frame_area);
   }
   
   // init device stack on configured roothub port
