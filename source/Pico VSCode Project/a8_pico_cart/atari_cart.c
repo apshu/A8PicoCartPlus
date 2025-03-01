@@ -41,6 +41,7 @@
 #include "fatfs_disk.h"
 
 #include "eeram_i2c.h"
+#include "ssd1306.h"
 
 #if !(defined(PICO_DEFAULT_I2C_SCL_PIN) && defined (PICO_DEFAULT_I2C_SDA_PIN) && defined(DEFAULT_I2C_CLK_SPEED))
 #error "I2C not defined"
@@ -1742,6 +1743,77 @@ void emulate_cartridge(int cartType) {
 	}
 }
 
+bool load_artwork(char *base_filepath, void* framebuffer) {
+	bool retVal = false;
+	FATFS FatFs;
+	UINT bytes_read;
+	char filename[FF_MAX_LFN + 1];
+	strncpy(filename, base_filepath, sizeof(filename) - 1);
+	strncat(filename, ".lcd", sizeof(filename) - 1);
+	filename[sizeof(filename) - 1] = 0;
+
+	if (f_mount(&FatFs, "", 1) == FR_OK) {
+		// Successful filesystem mount
+		FIL fil;
+		// Try opening DIB artwork file
+		if (f_open(&fil, filename, FA_READ) == FR_OK) {
+			// Artwork file successfully opened
+			struct __attribute__((__packed__))  lcdFileHeader_t
+			{
+				uint32_t magic;
+				uint16_t def_x;
+				uint16_t def_y;
+				uint16_t width;
+				uint16_t height;
+				uint8_t image_mode;
+			} lcdFileHeader;
+			
+			if ((f_read(&fil, &lcdFileHeader, sizeof(lcdFileHeader), &bytes_read) == FR_OK) && (bytes_read == sizeof(lcdFileHeader))) {
+				if (lcdFileHeader.magic == 0x3144434C) {
+					// File magic signature matches 'LCD1'
+					if ((lcdFileHeader.image_mode == 1) && (lcdFileHeader.width == SSD1306_WIDTH) && (lcdFileHeader.height == SSD1306_HEIGHT) && (lcdFileHeader.def_x == 0) && (lcdFileHeader.def_y == 0)) {
+						// Monochrome image with matching dimensions
+						if ((f_read(&fil, framebuffer, SSD1306_BUF_LEN, &bytes_read) == FR_OK) && (bytes_read == SSD1306_BUF_LEN)) {
+							// Image successfully read
+							retVal = true;
+						} else {
+							strcpy(errorBuf, "Can't read image data");
+						}
+					} else {
+						strcpy(errorBuf, "Invalid image size");
+					}
+				} else {
+					strcpy(errorBuf, "Invalid LCD file");
+				}
+			} else {
+				strcpy(errorBuf, "Can't identify file type");
+			}
+			f_close(&fil);
+		} else {
+			strcpy(errorBuf, "Can't open file");
+		}
+	} else {
+		strcpy(errorBuf, "Can't mount flash");
+	}
+
+	return retVal;
+}
+
+void show_artwork(void *framebuffer) {
+	static bool OLED_initialized = false;
+	if (OLED_initialized || SSD1306_init()) {
+		OLED_initialized = true;
+		GFX_render_area_t frame_area = {
+		start_col: 0,
+		end_col : SSD1306_WIDTH - 1,
+		start_page : 0,
+		end_page : SSD1306_NUM_PAGES - 1
+		};
+	    GFX_calc_render_area_buflen(&frame_area);
+		SSD1306_render(framebuffer, &frame_area);
+	}
+}
+
 void __not_in_flash_func(atari_cart_main)()
 {
     gpio_init_mask(ALL_GPIO_MASK);
@@ -1795,6 +1867,9 @@ void __not_in_flash_func(atari_cart_main)()
 				eeramDataBuf.fullPathChecksum = -eeramDataBuf.fullPathChecksum; // Two's complement
 				strcat(path, "/");
 				strcat(path, entry[n].filename);
+				if (load_artwork(path, cart_ram)) {
+					show_artwork(cart_ram);
+				}
 				if (strcasecmp(get_filename_ext(entry[n].filename), "ATR")==0)
 				{	// ATR
 					cart_d5xx[0x01] = 3;	// ATR
