@@ -1837,6 +1837,16 @@ void __not_in_flash_func(atari_cart_main)()
     while (1) {
         int cmd = emulate_boot_rom(atrMode);
 
+		// Erase screen when the first command is executed
+		static bool screen_need_erase = true;
+		if (screen_need_erase) {
+			// Clear framebuffer
+			memset(cart_ram, 0, sizeof(cart_ram));
+			// Show cleared framebuffer
+			show_artwork(cart_ram);
+			screen_need_erase = false;
+		}
+
         // OPEN ITEM n
         if (cmd == CART_CMD_OPEN_ITEM) 
         {
